@@ -2,39 +2,74 @@ $(function(){
     $("button#btnEntrar").on("click", function(e){
         e.preventDefault();
 
-        var campoEmail = $("form#formularioLogin #email").val();
-        var campoSenha = $("form#formularioLogin #senha").val();
+        var classe = $("div#formulario").attr("class");
 
-        if(campoEmail.trim() == "" || campoSenha.trim() == ""){
-            $("div#mensagem").show().removeClass("red").html("Preencha todos os campos!");
-        }else{
-        $.ajax({
-            url: "acoes/acesso.php",
-            type: "POST",
-            data: {
-                type: "login",
-                email: campoEmail,
-                senha: campoSenha
-            },
+        if(classe == "esqueci"){
+            var campoEmail = $("form#formularioLogin #email").val();
 
-            success: function(retorno){
-                retorno = JSON.parse(retorno);
+            if(campoEmail.trim() == ""){
+                $("div#mensagem").show().removeClass("red").html("Preencha o seu email.");
+            }else{
+                $.ajax({
+                    url: "acoes/acesso.php",
+                    type: "POST",
+                    data: {
+                        type: "esqueci",
+                        email: campoEmail
+                    },
 
-                if(retorno["erro"]){
-                    $("div#mensagem").show().addClass("red").html(retorno["mensagem"]);
-                }else{
-                    window.location = "dashboard.php";
-                }
-            },
+                    success: function(retorno){
+                        retorno = JSON.parse(retorno);
 
-            error: function(){
-                $("div#mensagem").show().addClass("red").html("Ocorreu um erro durante a solicitação");
+                        if(retorno["erro"] == 1){
+                            $("div#mensagem").show().addClass("red").html(retorno["mensagem"]);
+                        }else if(retorno["erro"] == 2){
+                            $("div#mensagem").show().removeClass("red").html(retorno["mensagem"]);
+                        }
+                    },
+
+                    error: function(){
+                        $("div#mensagem").show().addClass("red").html("Ocorreu um erro durante a solicitação");
+                    }
+                });
             }
-        });
-    }
+        }else{
+            var campoEmail = $("form#formularioLogin #email").val();
+            var campoSenha = $("form#formularioLogin #senha").val();
+
+            if(campoEmail.trim() == "" || campoSenha.trim() == ""){
+                $("div#mensagem").show().removeClass("red").html("Preencha todos os campos.");
+            }else{
+                $.ajax({
+                    url: "acoes/acesso.php",
+                    type: "POST",
+                    data: {
+                        type: "login",
+                        email: campoEmail,
+                        senha: campoSenha
+                    },
+
+                    success: function(retorno){
+                        retorno = JSON.parse(retorno);
+
+                        if(retorno["erro"] == 1){
+                            $("div#mensagem").show().addClass("red").html(retorno["mensagem"]);
+                        }else if(retorno["erro"] == 2){
+                            $("div#mensagem").show().removeClass("red").html(retorno["mensagem"]);
+                        }else{
+                            window.location = "dashboard.php";
+                        }
+                    },
+
+                    error: function(){
+                        $("div#mensagem").show().addClass("red").html("Ocorreu um erro durante a solicitação");
+                    }
+                });
+            }
+        }
     });
 
-    $("button#btnCadastro").on("click", function(e){
+    $("button#btnCadastrar").on("click", function(e){
         e.preventDefault();
 
         var campoEmail = $("form#formularioCadastro #emailCadastro").val();
@@ -42,33 +77,42 @@ $(function(){
         var campoNome = $("form#formularioCadastro #nomeCadastro").val();
 
         if(campoEmail.trim() == "" || campoSenha.trim() == "" || campoNome.trim() == ""){
-            $("div#mensagem").show().removeClass("red").html("Preencha todos os campos!");
+            $("div#mensagem").show().removeClass("red").html("Preencha todos os campos.");
         }else{
-        $.ajax({
-            url: "acoes/acesso.php",
-            type: "POST",
-            data: {
-                type: "cadastro",
-                email: campoEmail,
-                senha: campoSenha,
-                nome: campoNome
-            },
+            $.ajax({
+                url: "acoes/acesso.php",
+                type: "POST",
+                data: {
+                    type: "cadastro",
+                    email: campoEmail,
+                    senha: campoSenha,
+                    nome: campoNome
+                },
 
-            success: function(retorno){
-                retorno = JSON.parse(retorno);
+                success: function(retorno){
+                    retorno = JSON.parse(retorno);
 
-                if(retorno["erro"]){
-                    $("div#mensagem").show().addClass("red").html(retorno["mensagem"]);
-                }else{
-                    window.location = "dashboard.php";
+                    if(retorno["erro"] == 1){
+                        $("div#mensagem").show().addClass("red").html(retorno["mensagem"]);
+                    }else if(retorno["erro"] == 2){
+                        $("div#mensagem").show().removeClass("red").html("Enviamos um email de confirmação para "+campoEmail+"");
+                    }
+                },
+
+                error: function(){
+                    $("div#mensagem").show().addClass("red").html("Ocorreu um erro durante a solicitação");
                 }
-            },
+            });
+        }
+    });
 
-            error: function(){
-                $("div#mensagem").show().addClass("red").html("Ocorreu um erro durante a solicitação");
-            }
-        });
-    }
+    $("a#esqueciSenha").on("click", function(){
+        $("div#formulario").addClass("esqueci");
+
+        $("form#formularioLogin span.title").html("Digite o seu email");
+        $("button#btnEntrar").html("Enviar");
+        $("div#formulario div#linha.senha").hide();
+        $(this).hide();
     });
 
     $("button.change").on("click", function(){
@@ -76,7 +120,7 @@ $(function(){
 
         $("form#formularioCadastro").toggle();
         $("form#formularioLogin").toggle();
-
+        
         $("div#textoLogin").toggle();
         $("div#textoCadastro").toggle();
     });
